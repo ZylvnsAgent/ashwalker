@@ -1,4 +1,4 @@
-// EMBERLINE — a threejs-fps-01 entry (Node 22, standard library only): a round-based
+// ASHWALKER — a threejs-fps-01 entry (Node 22, standard library only): a round-based
 // tactical FPS in a dusk container yard. Two teams of three, two bomb sites, three
 // lanes, money between rounds, three guns and a frag grenade, and bots that hold
 // sites, push lanes, plant and defuse. The game is this directory's game/ folder,

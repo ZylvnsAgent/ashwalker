@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>EMBERLINE — a three.js tactical FPS</title>
+<title>ASHWALKER — a three.js tactical FPS</title>
 <style>
   /* Look plan: canvas, surface, hairline, ink, muted and one accent, plus the
      site green and enemy red from palette.js. Every colour below is one of them. */
@@ -70,8 +70,8 @@
   #score-value { font-family: var(--font-readout); font-size: 13px; color: var(--muted); letter-spacing: 0.04em; }
   #alive { display: flex; align-items: center; gap: 4px; }
   #alive .pip { width: 9px; height: 9px; border-radius: 50%; background: var(--hairline); display: inline-block; }
-  #alive .pip.ember.on { background: var(--site); }
-  #alive .pip.ash.on { background: var(--enemy); }
+  #alive .pip.ember.on { background: var(--accent); }
+  #alive .pip.ash.on { background: var(--site); }
   #alive .vs { font-size: 10px; color: var(--muted); margin: 0 4px; font-family: var(--font-readout); }
   #bomb-status {
     font-family: var(--font-readout); font-size: 13px; color: var(--accent);
@@ -208,7 +208,7 @@
 
 <div id="overlay" class="overlay">
   <section class="panel" role="dialog" aria-modal="true" aria-labelledby="overlay-title">
-    <h1 id="overlay-title">EMBER<span class="ember">LINE</span></h1>
+    <h1 id="overlay-title">ASH<span class="ember">WALKER</span></h1>
     <p id="overlay-copy">A dusk container yard. Two sites, three lanes, one bomb. Hold the sites — or take one.</p>
     <button id="play" type="button">Click to play</button>
     <ul class="keys">

@@ -5,8 +5,8 @@
 import { WEAPONS, FRAG } from './weapons.js';
 
 const COPY = {
-  start: { title: 'EMBERLINE', copy: 'A dusk container yard. Two sites, three lanes, one bomb. Hold the sites — or take one.', action: 'Click to play' },
-  paused: { title: 'EMBERLINE', copy: 'Paused. Click to resume.', action: 'Click to resume' },
+  start: { title: 'ASHWALKER', copy: 'A dusk container yard. Two sites, three lanes, one bomb. Hold the sites — or take one.', action: 'Click to play' },
+  paused: { title: 'ASHWALKER', copy: 'Paused. Click to resume.', action: 'Click to resume' },
   round: { title: '', copy: '', action: 'Next round' },
   match: { title: '', copy: '', action: 'Play again' },
 };

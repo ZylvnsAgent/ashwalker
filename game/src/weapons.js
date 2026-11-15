@@ -4,6 +4,7 @@
 // simple arc, bounce once, then explode; main.js applies the damage.
 import * as THREE from 'three';
 import { PALETTE } from './palette.js';
+import { buildGun } from './rifle.js';
 
 export const WEAPONS = [
   { id: 'pistol', name: 'P-9 Sidearm', price: 0, damage: 26, headMult: 4, gap: 0.16, auto: false, mag: 12, reserve: 48, reload: 1.4, spreadStill: 0.004, spreadMove: 0.02, recoil: 0.006, range: 60 },
@@ -16,36 +17,15 @@ const GRENADE_GRAVITY = 12;
 const MUZZLE_TIME = 0.06;
 
 function gunModel(def) {
-  const grip = new THREE.MeshStandardMaterial({ color: new THREE.Color(PALETTE.hairline), roughness: 0.7, metalness: 0.2 });
-  const body = new THREE.MeshStandardMaterial({ color: new THREE.Color(PALETTE.ink), roughness: 0.5, metalness: 0.35 });
-  const accent = new THREE.MeshStandardMaterial({ color: new THREE.Color(PALETTE.accent), roughness: 0.5, metalness: 0.2 });
+  const { group, muzzleZ } = buildGun(def.id);
+  // Slight yaw so the side profile (not just the flat top) faces the camera.
+  group.rotation.y = 0.10;
+  if (def.id === 'pistol') group.scale.setScalar(0.88);
   const model = new THREE.Group();
-  if (def.id === 'pistol') {
-    const slide = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.07, 0.24), body);
-    const handle = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.14, 0.08), grip);
-    handle.position.set(0, -0.09, 0.08);
-    model.add(slide, handle);
-  } else if (def.id === 'smg') {
-    const receiver = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.1, 0.34), body);
-    const barrel = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.04, 0.26), grip);
-    barrel.position.set(0, 0.02, -0.28);
-    const mag = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.16, 0.07), grip);
-    mag.position.set(0, -0.12, -0.02);
-    const sight = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.05, 0.06), accent);
-    sight.position.set(0, 0.07, -0.05);
-    model.add(receiver, barrel, mag, sight);
-  } else {
-    const receiver = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.1, 0.42), body);
-    const barrel = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.045, 0.4), grip);
-    barrel.position.set(0, 0.025, -0.38);
-    const stock = new THREE.Mesh(new THREE.BoxGeometry(0.075, 0.08, 0.22), grip);
-    stock.position.set(0, -0.02, 0.3);
-    const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.095, 0.02, 0.2), accent);
-    stripe.position.set(0, 0.055, -0.05);
-    model.add(receiver, barrel, stock, stripe);
-  }
+  model.add(group);
   model.position.set(0.24, -0.2, -0.42);
   model.visible = false;
+  model.userData.muzzleZ = muzzleZ;
   return model;
 }
 
@@ -82,6 +62,14 @@ export function createWeapons(camera) {
 
   function showModel() {
     models.forEach((model, i) => { model.visible = i === current; });
+    // Muzzle flash + light sit at the current gun's muzzle, not a fixed point.
+    // The view model is yawed 0.10, so the muzzle tip sits slightly left of the
+    // gun's origin: x = 0.24 + muzzleZ*sin(0.10), z = -0.42 + muzzleZ*cos(0.10).
+    const mz = models[current].userData.muzzleZ;
+    const fx = 0.24 + mz * Math.sin(0.10);
+    const fz = -0.42 + mz * Math.cos(0.10);
+    flash.position.set(fx, -0.18, fz);
+    flashLight.position.set(fx, -0.16, fz + 0.35);
   }
   showModel();
 

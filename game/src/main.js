@@ -1,4 +1,4 @@
-// EMBERLINE: boot and the one loop. A fixed 60 Hz simulation feeds a render at
+// ASHWALKER: boot and the one loop. A fixed 60 Hz simulation feeds a render at
 // the display's rate. ?shot=buy|play|bomb|end with &seed=N sets up a deterministic
 // frame for a capture, renders it twice, then freezes it and sets window.__shotReady.
 import * as THREE from 'three';
@@ -147,7 +147,7 @@ const rounds = createRounds(state, {
     const won = winner === state.playerSide;
     const acc = state.stats.shots ? Math.round((100 * state.stats.hits) / state.stats.shots) : 0;
     hud.showOverlay('match', {
-      title: won ? 'VICTORY — EMBERLINE is yours' : 'DEFEAT — the yard belongs to them',
+      title: won ? 'VICTORY — ASHWALKER is yours' : 'DEFEAT — the yard belongs to them',
       copy: `Final score EMBER ${state.wins.ember} — ${state.wins.ash} ASH. You: ${state.kills} kills, ${state.deaths} deaths, ${acc}% accuracy.`,
     });
   },
@@ -572,6 +572,9 @@ function runShot(name) {
     hud.hideOverlay();
     hud.banner('Defend the sites', 'Round 4 · first to 5');
     player.damage(22);
+    // The combat frame shows the VK-7 rifle: bought + switched before shooting.
+    weapons.buy(2);
+    weapons.switchTo(2);
     body.position.set(0, 0, 2);
     body.yaw = 0;
     body.pitch = 0;
