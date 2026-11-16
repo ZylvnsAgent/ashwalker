@@ -471,6 +471,94 @@ function letterDraw(letter, color) {
   };
 }
 
+// Site boundary ring: yellow border band with black hazard diagonals,
+// painted on transparency so it reads as a floor marking.
+function siteRingDraw(ctx, size, rng) {
+  ctx.clearRect(0, 0, size, size);
+  const band = size * 0.09;
+  // Yellow band around the edge.
+  ctx.fillStyle = '#d8a018';
+  ctx.fillRect(0, 0, size, band);
+  ctx.fillRect(0, size - band, size, band);
+  ctx.fillRect(0, 0, band, size);
+  ctx.fillRect(size - band, 0, band, size);
+  // Black diagonal stripes clipped to the band.
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(0, 0, size, band);
+  ctx.rect(0, size - band, size, band);
+  ctx.rect(0, 0, band, size);
+  ctx.rect(size - band, 0, band, size);
+  ctx.clip();
+  ctx.fillStyle = '#1c140c';
+  const stripe = size * 0.11;
+  for (let x = -size; x < size * 2; x += stripe * 2) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x + stripe, 0);
+    ctx.lineTo(x + stripe - size, size);
+    ctx.lineTo(x - size, size);
+    ctx.closePath();
+    ctx.fill();
+  }
+  ctx.restore();
+  // Wear: punch holes out of the paint.
+  ctx.globalCompositeOperation = 'destination-out';
+  for (let i = 0; i < 160; i += 1) {
+    ctx.globalAlpha = 0.4 + rng() * 0.6;
+    ctx.beginPath();
+    ctx.arc(rng() * size, rng() * size, 0.5 + rng() * 2.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'source-over';
+}
+
+// Wall direction sign: big site letter + down arrow, spray-painted.
+// Drawn for a 1.6 x 1.0 plane, so x is pre-squashed (1/1.6) to keep the
+// letter and arrow undistorted once the square texture stretches.
+function signDraw(letter) {
+  return (ctx, size, rng) => {
+    ctx.clearRect(0, 0, size, size);
+    const squash = 1 / 1.6;
+    // Site letter, left.
+    ctx.save();
+    ctx.translate(size * 0.30, size * 0.54);
+    ctx.scale(squash, 1);
+    ctx.fillStyle = '#3fae8a';
+    ctx.font = `900 ${size * 0.62}px Arial, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(letter, 0, 0);
+    ctx.restore();
+    // Down arrow, right.
+    ctx.save();
+    ctx.translate(size * 0.74, size * 0.54);
+    ctx.scale(squash, 1);
+    ctx.fillStyle = '#e8b23a';
+    const w = size * 0.18;
+    const h = size * 0.32;
+    ctx.fillRect(-w * 0.22, -h, w * 0.44, h * 1.1);
+    ctx.beginPath();
+    ctx.moveTo(0, h);
+    ctx.lineTo(-w * 0.55, -h * 0.1);
+    ctx.lineTo(w * 0.55, -h * 0.1);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+    // Wear: punch holes out of the paint.
+    ctx.globalCompositeOperation = 'destination-out';
+    for (let i = 0; i < 140; i += 1) {
+      ctx.globalAlpha = 0.4 + rng() * 0.6;
+      ctx.beginPath();
+      ctx.arc(rng() * size, rng() * size, 0.5 + rng() * 2.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+  };
+}
+
 export function createTextures() {
   return {
     concrete: canvasTexture(256, concreteDraw, 11),
@@ -494,5 +582,8 @@ export function createTextures() {
     flash: canvasTexture(128, flashDraw, 83),
     letterA: canvasTexture(256, letterDraw('A', '#3fae8a'), 89),
     letterB: canvasTexture(256, letterDraw('B', '#3fae8a'), 97),
+    siteRing: canvasTexture(256, siteRingDraw, 131),
+    signA: canvasTexture(256, signDraw('A'), 137),
+    signB: canvasTexture(256, signDraw('B'), 139),
   };
 }

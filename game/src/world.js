@@ -32,6 +32,23 @@ const NODES = [
   [0, -8], [0, -4], [0, 0], [0, 4], [0, 8], [-8, -8], [8, -8], [-8, 0],
   [8, 0], [-8, 8], [8, 8], [-6, 16], [0, 16], [6, 16], [-11, -9], [11, -9],
   [-16, 12], [16, 12], [-12, -16], [12, -16], [-12, 16], [12, 16],
+  // Spawn clusters (map redesign 2026-11-16; pushed to the corners
+  // 2026-11-16 on user order "kurang pojok" + "ash kurang ke kiri,
+  // ember kurang ke bawah", then to the EXTREME corners 2026-11-16 on
+  // user order "ash makin ke kiri pojok kiri atas dirapetin, ember
+  // makin ke bawah pojok kanan bawah"): each team's 5 spawn points
+  // packed TIGHT in the absolute corner of its respawn box. ASH (blue,
+  // top-left box) 36-40 around (-20.8,-16.9) in the NW corner — 0.5 m
+  // off the west/north walls (player radius 0.34), the red (-18,-12)
+  // container's west/north faces are the pocket's inner limits.
+  // EMBER (orange, bottom-right box) 41-45 around (17.8,16.8) in the
+  // SE pocket — 0.5 m off the big corner stack's west face (19.0) and
+  // the south wall (18.0). The stack itself (20.3,14.5, x 19.0-21.6,
+  // z 11.5-17.5) occupies the absolute SE corner; EMBER sits as close
+  // as geometry allows without moving it. Clear of every container
+  // (node clearance >= 0.5 m) and 0.5 m clear of the walls.
+  [-20.8, -16.9], [-21.5, -17.5], [-20.1, -17.5], [-21.5, -16.3], [-20.1, -16.3],
+  [17.8, 16.8], [17.1, 16.1], [18.5, 16.1], [17.1, 17.5], [18.5, 17.5],
 ];
 const EDGES = [
   [0, 1], [1, 2], [0, 3], [1, 13], [2, 8], [3, 4], [4, 5], [5, 7], [4, 6],
@@ -42,6 +59,16 @@ const EDGES = [
   [22, 24], [17, 23], [17, 24], [18, 23], [18, 24], [23, 30], [24, 31],
   [30, 25], [31, 27], [25, 26], [26, 27], [23, 25], [24, 27], [18, 26],
   [5, 21], [10, 22], [32, 0], [33, 2], [34, 25], [35, 27],
+  // Spawn-cluster wiring: ring inside each cluster + links to the graph.
+  // ASH cluster (36 centre, NW corner) links to the north lane (32, 0) —
+  // deliberately NOT to node 28, so ASH bots reach the sites via the
+  // north-mid lane (see balance note in main.js).
+  [36, 37], [36, 38], [36, 39], [36, 40], [37, 38], [39, 40], [36, 32], [36, 0],
+  // EMBER cluster (41 centre, SE pocket) links to node 31 (16,12) only —
+  // the (16,10) crate blocks a direct northward edge past 31, and the
+  // (7.6,12.4) crate leaves < 0.6 m for a 27 link. 31 already joins 24
+  // and 27, so one link is enough.
+  [41, 42], [41, 43], [41, 44], [41, 45], [42, 43], [44, 45], [41, 31],
 ];
 
 function mulberry32(initial) {
@@ -453,6 +480,16 @@ export function createWorld(scene) {
     zone.rotation.x = -Math.PI / 2;
     zone.position.set(cx, 0.02, cz);
     group.add(zone);
+    // Yellow/black hazard boundary ring circling the plant zone: the ring
+    // straddles the exact plant boundary (half 3), so the painted line IS
+    // the line the plant rule uses (world.siteAt).
+    const ring = new THREE.Mesh(
+      new THREE.PlaneGeometry(6.4, 6.4),
+      new THREE.MeshBasicMaterial({ map: tex.siteRing, transparent: true, opacity: 0.95, depthWrite: false }),
+    );
+    ring.rotation.x = -Math.PI / 2;
+    ring.position.set(cx, 0.028, cz);
+    group.add(ring);
     const strip = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 6), new THREE.MeshBasicMaterial({ color: new THREE.Color(PALETTE.accent), transparent: true, opacity: 0.5 }));
     strip.rotation.x = -Math.PI / 2;
     strip.position.set(cx, 0.03, cz);
@@ -460,14 +497,40 @@ export function createWorld(scene) {
     // Painted stencil letter on the ground, so the site reads from any angle.
     const letter = new THREE.Mesh(
       new THREE.PlaneGeometry(3.6, 3.6),
-      new THREE.MeshBasicMaterial({ map: label === 'A' ? tex.letterA : tex.letterB, transparent: true, opacity: 0.55, depthWrite: false }),
+      new THREE.MeshBasicMaterial({ map: label === 'A' ? tex.letterA : tex.letterB, transparent: true, opacity: 0.9, depthWrite: false }),
     );
     letter.rotation.x = -Math.PI / 2;
     letter.position.set(cx, 0.025, cz);
     group.add(letter);
   }
-  siteMarker(-16, -9, 'A');
+  // Site A moved 2026-11-16 (user annotated map): from the top-left
+  // (-16,-9) to the yellow area middle-left, left of the central H
+  // structure. Plant node 21 (-8,0) sits inside the new zone.
+  siteMarker(-9, 0, 'A');
   siteMarker(16, -9, 'B');
+
+  // Wall direction signs on the entry paths to each site: big site letter
+  // + down arrow, sprayed on the wall/container face the approach sees.
+  function siteSign(x, y, z, ry, label) {
+    const sign = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.6, 1.0),
+      new THREE.MeshBasicMaterial({ map: label === 'A' ? tex.signA : tex.signB, transparent: true, opacity: 0.95, depthWrite: false }),
+    );
+    sign.position.set(x, y, z);
+    sign.rotation.y = ry;
+    sign.receiveShadow = true;
+    group.add(sign);
+  }
+  // North wall above each site's long lane + the container face at the site
+  // pocket's north edge (clear of the NF.U stencil next to it).
+  // Site A signs moved with the site (2026-11-16): A1 on the east face of
+  // the west mid-door pillar, facing the mid approach; A2 on the north face
+  // of the (-17.5,2) container, facing the A-long approach. The old
+  // top-left signs are gone with the old site.
+  siteSign(-3.34, 2.0, -3.5, Math.PI / 2, 'A');
+  siteSign(-17.5, 1.6, 1.36, Math.PI, 'A');
+  siteSign(16, 2.0, -17.94, 0, 'B');
+  siteSign(15, 1.6, -12.36, 0, 'B');
 
   // Distant skyline silhouettes outside the walls, for depth in wide shots.
   // Flat unlit material: they sit outside the sun's shadow frustum, so a lit
@@ -575,7 +638,7 @@ export function createWorld(scene) {
   const fillEast = new THREE.DirectionalLight(new THREE.Color('#9ab0d0'), 1.2);
   fillEast.position.set(18, 10, -2);
   scene.add(fillEast);
-  for (const [x, z] of [[-16, -9], [16, -9]]) {
+  for (const [x, z] of [[-9, 0], [16, -9]]) {
     const lamp = new THREE.PointLight(new THREE.Color(PALETTE.accent), 18, 14, 1.6);
     lamp.position.set(x, 4.4, z);
     scene.add(lamp);
@@ -596,10 +659,12 @@ export function createWorld(scene) {
     bounds: { minX: -22.2, maxX: 22.2, minZ: -18.2, maxZ: 18.2 },
     waypoints: { nodes: NODES, adjacency },
     sites: {
-      A: { center: { x: -16, z: -9 }, half: 3, node: 6, label: 'A' },
+      // Site A moved 2026-11-16 to the yellow area middle-left (-9,0),
+      // plant node 21 (-8,0). Site B stays top-right (16,-9), node 11.
+      A: { center: { x: -9, z: 0 }, half: 3, node: 21, label: 'A' },
       B: { center: { x: 16, z: -9 }, half: 3, node: 11, label: 'B' },
     },
-    spawns: { ash: [0, 1, 2], ember: [25, 26, 27] },
+    spawns: { ash: [36, 37, 38], ember: [41, 42, 43] },
     siteAt(x, z) {
       for (const key of ['A', 'B']) {
         const s = this.sites[key];

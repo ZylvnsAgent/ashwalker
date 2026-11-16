@@ -97,10 +97,12 @@ export function createHud() {
   const NOTIFY_SHOW_S = 2; // sim seconds per notification
   let notifyQueue = [];
   let notifyShowing = null; // { kind, until }
-  // Kill-feed line lifetime (wall ms). Real gameplay: 6s. The ?shot=
-  // showcase driver may hold lines longer so a slow still can catch them —
-  // main.js sets it only inside runShot, never in real play.
-  let feedLifetimeMs = 6000;
+  // Kill-feed line lifetime (wall ms). Real gameplay: 10s (raised from 6s
+  // 2026-11-16 on the user's order — "biar aman ubah sekalian aja jadi
+  // 8-10 detik" — so feed lines stay readable longer in real play). The
+  // ?shot= showcase driver may hold lines longer so a slow still can catch
+  // them — main.js sets it only inside runShot, never in real play.
+  let feedLifetimeMs = 10000;
   // Winged medal per kind: red for headshot tiers, gold for streak tiers.
   // The glyph is a skull (headshot), a skull ×2 (chain headshot), the multi
   // count, a star (chain killer), an A (ace), a blood drop (first blood),

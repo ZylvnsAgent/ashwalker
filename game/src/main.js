@@ -198,34 +198,54 @@ const body = player.state;
 function buildSetup(side) {
   const ashSite = random() < 0.5 ? 'A' : 'B';
   const other = ashSite === 'A' ? 'B' : 'A';
+  // Spawn clusters (map redesign 2026-11-16, user annotated map; pushed
+  // to the far corners 2026-11-16 on user order "kurang pojok" + "ash
+  // kurang ke kiri, ember kurang ke bawah", then to the EXTREME corners
+  // 2026-11-16 on user order "ash makin ke kiri pojok kiri atas
+  // dirapetin, ember makin ke bawah pojok kanan bawah"): EMBER (orange)
+  // bottom-right in the red box, ASH (blue) top-left in the green box.
+  // Each team's 5 points sit packed tight in a ~1.4x1.4 m cluster in
+  // the absolute corner: ASH centre (-20.8,-16.9), EMBER centre
+  // (17.8,16.8). Balance (BFS path length on the waypoint graph, site A
+  // node 21 / site B node 11): ASH -> A 40.8 m, B 41.4 m; EMBER -> A
+  // 35.0 m, B 38.6 m — ASH now walks +5.8 m to A and +2.8 m to B vs
+  // EMBER (was +6.8/+3.8). That is the trade-off of the corner order,
+  // reported honestly; do not silently move a site to fix it.
+  // A-B stay 26.6 m apart. NOTE: ASH's cluster deliberately links to the
+  // north lane (nodes 32, 0) and NOT to node 28 — the 28 shortcut would
+  // cut ASH -> A to ~17 m. Residual: a human walking straight from the
+  // ASH spawn to site A covers ~20 m (both are west-side, as drawn),
+  // vs ~30 m for EMBER — the straight-line human walk to A favours ASH
+  // even though the bot-path walk now favours EMBER; flag to the user,
+  // do not silently move A out of the yellow box to fix it.
   if (side === SIDE.EMBER) {
     return {
-      playerNode: 26, playerYaw: 0,
+      playerNode: 41, playerYaw: 0,
       bots: [
-        { team: 'ember', role: 'holdA', name: 'Sable', node: 25, yaw: -Math.PI / 2 },
-        { team: 'ember', role: 'holdB', name: 'Wren', node: 27, yaw: Math.PI / 2 },
-        { team: 'ember', role: 'roam', name: 'Juno', node: 34, yaw: 0 },
-        { team: 'ember', role: 'holdA', name: 'Fable', node: 35, yaw: -Math.PI / 2 },
-        { team: 'ash', role: 'carrier', name: 'Vex', node: 0, yaw: Math.PI, site: ashSite },
-        { team: 'ash', role: 'escort', name: 'Rook', node: 1, yaw: Math.PI, site: ashSite },
-        { team: 'ash', role: 'flank', name: 'Moth', node: 2, yaw: Math.PI, site: other },
-        { team: 'ash', role: 'escort', name: 'Havoc', node: 32, yaw: Math.PI, site: ashSite },
-        { team: 'ash', role: 'flank', name: 'Onyx', node: 33, yaw: Math.PI, site: other },
+        { team: 'ember', role: 'holdA', name: 'Sable', node: 42, yaw: 0 },
+        { team: 'ember', role: 'holdB', name: 'Wren', node: 43, yaw: 0 },
+        { team: 'ember', role: 'roam', name: 'Juno', node: 44, yaw: 0 },
+        { team: 'ember', role: 'holdA', name: 'Fable', node: 45, yaw: 0 },
+        { team: 'ash', role: 'carrier', name: 'Vex', node: 36, yaw: Math.PI, site: ashSite },
+        { team: 'ash', role: 'escort', name: 'Rook', node: 37, yaw: Math.PI, site: ashSite },
+        { team: 'ash', role: 'flank', name: 'Moth', node: 38, yaw: Math.PI, site: other },
+        { team: 'ash', role: 'escort', name: 'Havoc', node: 39, yaw: Math.PI, site: ashSite },
+        { team: 'ash', role: 'flank', name: 'Onyx', node: 40, yaw: Math.PI, site: other },
       ],
     };
   }
   return {
-    playerNode: 1, playerYaw: Math.PI,
+    playerNode: 36, playerYaw: Math.PI,
     bots: [
-      { team: 'ash', role: 'escort', name: 'Rook', node: 0, yaw: Math.PI, site: ashSite },
-      { team: 'ash', role: 'flank', name: 'Moth', node: 2, yaw: Math.PI, site: other },
-      { team: 'ash', role: 'escort', name: 'Havoc', node: 32, yaw: Math.PI, site: ashSite },
-      { team: 'ash', role: 'flank', name: 'Onyx', node: 33, yaw: Math.PI, site: other },
-      { team: 'ember', role: 'holdA', name: 'Sable', node: 25, yaw: -Math.PI / 2 },
-      { team: 'ember', role: 'holdB', name: 'Wren', node: 27, yaw: Math.PI / 2 },
-      { team: 'ember', role: 'roam', name: 'Pike', node: 26, yaw: 0 },
-      { team: 'ember', role: 'roam', name: 'Juno', node: 34, yaw: 0 },
-      { team: 'ember', role: 'holdA', name: 'Fable', node: 35, yaw: -Math.PI / 2 },
+      { team: 'ash', role: 'escort', name: 'Rook', node: 37, yaw: Math.PI, site: ashSite },
+      { team: 'ash', role: 'flank', name: 'Moth', node: 38, yaw: Math.PI, site: other },
+      { team: 'ash', role: 'escort', name: 'Havoc', node: 39, yaw: Math.PI, site: ashSite },
+      { team: 'ash', role: 'flank', name: 'Onyx', node: 40, yaw: Math.PI, site: other },
+      { team: 'ember', role: 'holdA', name: 'Sable', node: 42, yaw: 0 },
+      { team: 'ember', role: 'holdB', name: 'Wren', node: 43, yaw: 0 },
+      { team: 'ember', role: 'roam', name: 'Pike', node: 41, yaw: 0 },
+      { team: 'ember', role: 'roam', name: 'Juno', node: 44, yaw: 0 },
+      { team: 'ember', role: 'holdA', name: 'Fable', node: 45, yaw: 0 },
     ],
   };
 }
@@ -706,6 +726,7 @@ function step(dt) {
       state.bomb.defuseProgress = Math.max(0, state.bomb.defuseProgress - dt * 2);
       if (state.bomb.state === 'planted') hud.setBomb(`BOMB PLANTED — ${Math.max(0, Math.ceil(state.bomb.timer))}s · SITE ${state.bomb.site}`);
       else if (state.bomb.state === 'dropped') hud.setBomb(playerTeam === SIDE.ASH ? 'BOMB DROPPED — recover it' : '');
+      else if (playerTeam === SIDE.ASH && state.bomb.state === 'carried' && bombCarrier === 'player' && keys.has('KeyE') && body.alive) hud.setBomb('GET INSIDE THE YELLOW BOUNDARY TO PLANT');
       else hud.setBomb('');
     }
     // Pick up a dropped bomb.
@@ -926,15 +947,18 @@ function runShot(name) {
     hud.hideBanner();
     bomb.plant('A', state.bomb);
     state.bomb.timer = 28;
-    body.position.set(-11, 0, -9);
+    // Staged at the NEW site A (-9,0): player east of the site looking
+    // west at it, holder/mate flanking west of the site (clear of the
+    // (-13,3) crate stack).
+    body.position.set(-6, 0, 0);
     body.yaw = Math.PI / 2;
     body.pitch = 0;
     const holder = bots.bots.find((b) => b.team === SIDE.ASH);
     const mate = bots.bots.find((b) => b.team === SIDE.EMBER);
-    if (holder) placeBot(holder, -14, -11, -2.16);
-    if (mate) placeBot(mate, -14, -6, -0.79);
+    if (holder) placeBot(holder, -11, 3, -2.16);
+    if (mate) placeBot(mate, -11, -3, -0.79);
     settle(10);
-    aimAt(tmpVec.set(-16, 1.0, -9));
+    aimAt(tmpVec.set(-9, 1.0, 0));
     hud.setBomb('BOMB PLANTED — 28s · SITE A');
     syncHud();
     refreshMinimap();
@@ -1098,6 +1122,36 @@ function runShot(name) {
     }
     syncHud();
     refreshMinimap();
+  } else if (name === 'firecontainers') {
+    // Container-yard firing frame: the player scores a VK-7 headshot kill
+    // from the west A-site container pocket (NOT mid) — the red container
+    // sits directly behind the foe, the blue container + stacked grey
+    // behind-right, so the frame reads as a container yard. Same real-fire
+    // pattern as the cover branch: buy VK-7, aim at the foe's head, shoot,
+    // keep the last muzzle flash lit for the frame.
+    state.phase = PHASE.LIVE;
+    state.timer = 87;
+    state.wins.ember = 2;
+    state.wins.ash = 1;
+    state.round = 4;
+    state.money = 1200;
+    hud.hideBuy();
+    hud.hideOverlay();
+    weapons.buy(2);
+    weapons.switchTo(2);
+    body.position.set(-14, 0, -7);
+    body.yaw = 0;
+    body.pitch = 0;
+    const foe = bots.bots.find((b) => b.team === SIDE.ASH);
+    if (foe) placeBot(foe, -16.5, -11, 0);
+    settle(2);
+    if (foe) {
+      aimAt(tmpVec.set(foe.position.x, 1.50, foe.position.z));
+      shoot(0);
+      settle(2); // keep the last muzzle flash lit for the frame
+    }
+    syncHud();
+    refreshMinimap();
   } else if (name === 'scoreboard') {
     // Scoreboard showcase: seed match totals, TAB panel open.
     state.phase = PHASE.LIVE;
@@ -1144,6 +1198,91 @@ function runShot(name) {
     hud.showFullMap(state.round, state.wins);
     refreshFullMap();
     settle(10);
+    syncCamera();
+    syncHud();
+    refreshMinimap();
+  } else if (name === 'sites') {
+    // Site-marker showcase: three angles per site. view=approach (default):
+    // player 7 m south of the site looking down at the floor ring, the
+    // container-face wall sign in frame (site B; site A's signs face east
+    // and north, so they need view=sign). view=letter: player in the lane
+    // just north of the site, looking south at the floor letter + ring.
+    // view=sign: player in front of the site's wall sign, looking at it.
+    const key = params.get('site') || 'A';
+    const view = params.get('view') || 'approach';
+    const s = world.sites[key];
+    state.phase = PHASE.LIVE;
+    state.timer = 87;
+    state.wins.ember = 2;
+    state.wins.ash = 1;
+    state.round = 4;
+    hud.hideBuy();
+    hud.hideOverlay();
+    if (view === 'sign') {
+      // A: mid-door pillar sign (east face, faces mid). B: container-face
+      // sign south of site B (faces south, seen from the site).
+      if (key === 'A') body.position.set(2, 0, -3.5);
+      else body.position.set(15, 0, -9);
+    } else if (view === 'letter') {
+      // Floor-letter view: stand where the letter reads. Site A from the
+      // north lane (the south wood crate blocks it from the south); site B
+      // from the west (the (13,-13) container blocks it from the north,
+      // the (16,-6) wood crate from the south).
+      if (key === 'A') body.position.set(s.center.x, 0, s.center.z - 5.5);
+      else body.position.set(s.center.x - 7, 0, s.center.z);
+    } else body.position.set(s.center.x, 0, s.center.z + 7);
+    body.yaw = 0;
+    body.pitch = 0;
+    settle(10);
+    if (view === 'sign' && key === 'A') aimAt(tmpVec.set(-3.34, 2.0, -3.5));
+    else if (view === 'sign') aimAt(tmpVec.set(15, 1.6, -12.36));
+    else aimAt(tmpVec.set(s.center.x, 0.2, s.center.z));
+    settle(2);
+    syncHud();
+    refreshMinimap();
+  } else if (name === 'planttest') {
+    // Plant-zone rule test: ASH carrier plants only inside the site
+    // boundary. Bots are parked in hold, facing away, with reactionAt
+    // neutered so nothing shoots the player mid-test.
+    state.round = 2;
+    state.playerSide = SIDE.ASH;
+    playerTeam = SIDE.ASH;
+    state.phase = PHASE.LIVE;
+    state.timer = 90;
+    state.wins.ember = 0;
+    state.wins.ash = 0;
+    hud.hideBuy();
+    hud.hideOverlay();
+    bombCarrier = 'player';
+    state.bomb.state = 'carried';
+    state.bomb.plantProgress = 0;
+    for (const b of bots.bots) {
+      placeBot(b, b.group.position.x, b.group.position.z, b.team === SIDE.ASH ? 0 : Math.PI);
+      b.reactionAt = Infinity;
+    }
+    // 1) Inside site A, hold E for 3.5 s — must plant.
+    body.position.set(-9, 0, 0);
+    body.yaw = 0;
+    body.pitch = 0;
+    input.state.keys.add('KeyE');
+    settle(210);
+    const inside = { state: state.bomb.state, site: state.bomb.site };
+    input.state.keys.delete('KeyE');
+    // 2) Reset, stand at mid (outside any site), hold E — must NOT plant,
+    // and the boundary hint must show.
+    bomb.reset(state.bomb);
+    bombCarrier = 'player';
+    state.bomb.state = 'carried';
+    body.position.set(0, 0, 0);
+    input.state.keys.add('KeyE');
+    settle(210);
+    input.state.keys.delete('KeyE');
+    window.__plantTest = {
+      inside,
+      outside: { state: state.bomb.state, plantProgress: state.bomb.plantProgress },
+      hint: document.getElementById('bomb-status')?.textContent || '',
+      alive: body.alive,
+    };
     syncCamera();
     syncHud();
     refreshMinimap();
