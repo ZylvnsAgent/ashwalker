@@ -28,6 +28,7 @@ export function createPlayer(colliders) {
     crouching: false,
     height: STAND_HEIGHT,
     health: MAX_HEALTH,
+    shield: 0, // bought per round; absorbs damage before HP, resets on round start
     alive: true,
   };
   const probe = new THREE.Box3();
@@ -124,9 +125,16 @@ export function createPlayer(colliders) {
     },
     damage(amount) {
       if (!player.alive) return false;
-      player.health = Math.max(0, player.health - amount);
+      // Shield absorbs first; only the remainder touches HP.
+      const absorbed = Math.min(player.shield, amount);
+      player.shield -= absorbed;
+      player.health = Math.max(0, player.health - (amount - absorbed));
       if (player.health === 0) player.alive = false;
       return !player.alive;
+    },
+    setShield(value) {
+      // Buying never downgrades an existing shield (light after heavy is a no-op).
+      player.shield = Math.max(player.shield, value);
     },
     reset(x, z, yaw) {
       player.position.set(x, 0, z);
@@ -134,6 +142,7 @@ export function createPlayer(colliders) {
       player.yaw = yaw;
       player.pitch = 0;
       player.health = MAX_HEALTH;
+      player.shield = 0;
       player.alive = true;
       player.crouching = false;
       player.height = STAND_HEIGHT;

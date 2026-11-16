@@ -1,8 +1,9 @@
-// The look plan, in one place. Ember Yard at dusk: warm dark ground, rust containers,
-// concrete walls, one ember-orange accent. Every colour in the game is one of these names;
-// the same names are the CSS custom properties in index.html.
+// The look plan, in one place. Cargo Grid in bright late afternoon: light warm
+// ground, sunlit rust containers, concrete walls, one ember-orange accent.
+// Every colour in the game is one of these names; the same names are the CSS
+// custom properties in index.html.
 export const PALETTE = {
-  canvas: '#161009', // dusk sky / fog
+  canvas: '#54452f', // bright sky / fog
   surface: '#241b12', // concrete
   hairline: '#3d2f1f', // rusted steel
   ink: '#f2e8d5', // warm off-white

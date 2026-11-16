@@ -13,6 +13,9 @@ export function createInput(canvas, onLockChange) {
       keys.add(event.code);
     } else keys.delete(event.code);
     if (event.code === 'Space') event.preventDefault();
+    // Tab opens the scoreboard while held — keep focus on the game instead
+    // of cycling it through the page's buttons.
+    if (event.code === 'Tab') event.preventDefault();
   }
 
   window.addEventListener('keydown', (event) => setKey(event, true));

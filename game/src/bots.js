@@ -1,4 +1,4 @@
-// Bots: the other five players. Each bot walks the waypoint graph (BFS paths),
+// Bots: the other nine players. Each bot walks the waypoint graph (BFS paths),
 // holds a site or pushes one, sees through a vision cone with a line-of-sight ray,
 // hears gunshots, fights in bursts with distance-scaled aim error, and plays the
 // objective: the carrier plants, defenders defuse, everyone converges after a plant.
@@ -235,12 +235,13 @@ export function createBots(scene, world) {
     env.onBotShot(bot, eye, tmpDir.clone());
     if (!hit) return;
     const falloff = Math.max(0.4, 1 - seen.dist / 90);
-    const amount = BULLET_DAMAGE * falloff * (hit.object.userData.part === 'head' ? HEAD_MULT : 1);
-    if (seen.kind === 'player') env.damagePlayer(amount, hit.object.userData.part === 'head', bot);
-    else damageBot(seen.ref, amount, bot, env);
+    const isHead = hit.object.userData.part === 'head';
+    const amount = BULLET_DAMAGE * falloff * (isHead ? HEAD_MULT : 1);
+    if (seen.kind === 'player') env.damagePlayer(amount, isHead, bot);
+    else damageBot(seen.ref, amount, bot, env, isHead);
   }
 
-  function damageBot(bot, amount, attacker, env) {
+  function damageBot(bot, amount, attacker, env, headshot = false) {
     if (!bot.alive) return false;
     bot.health -= amount;
     if (bot.health > 0) {
@@ -252,7 +253,7 @@ export function createBots(scene, world) {
     bot.state = 'dead';
     bot.group.rotation.x = -Math.PI / 2 * 0.9;
     bot.group.position.y = 0.15;
-    if (env && env.onBotKilled) env.onBotKilled(bot, attacker);
+    if (env && env.onBotKilled) env.onBotKilled(bot, attacker, headshot);
     return true;
   }
 

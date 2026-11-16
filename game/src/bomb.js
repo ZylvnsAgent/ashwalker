@@ -73,11 +73,11 @@ export function createBomb(scene, world) {
     update(dt, bomb, now, onBeep, onExplode) {
       if (blast > 0) {
         blast += dt;
-        const t = blast / 0.9;
-        shell.scale.setScalar(1 + t * 9);
-        shell.material.opacity = Math.max(0, 0.55 * (1 - t));
-        flash.intensity = Math.max(0, 60 * (1 - t));
-        if (blast > 0.9) { shell.visible = false; flash.intensity = 0; blast = 0; }
+        const t = blast / 1.1;
+        shell.scale.setScalar(1 + t * 14);
+        shell.material.opacity = Math.max(0, 0.7 * (1 - t));
+        flash.intensity = Math.max(0, 90 * (1 - t));
+        if (blast > 1.1) { shell.visible = false; flash.intensity = 0; blast = 0; }
         return null;
       }
       if (bomb.state !== 'planted') return null;
